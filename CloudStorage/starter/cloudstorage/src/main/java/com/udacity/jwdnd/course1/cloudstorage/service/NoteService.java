@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.udacity.jwdnd.course1.cloudstorage.mapper.NoteMapper;
 import com.udacity.jwdnd.course1.cloudstorage.mapper.UserMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.Note;
+import com.udacity.jwdnd.course1.cloudstorage.model.User;
 
 @Service
 public class NoteService {
@@ -17,8 +18,9 @@ public class NoteService {
 		this.userMapper = userMapper;
 	}
 	
-	public int createNote(Note note) {
-		return noteMapper.insertNote(new Note(null, note.getNoteTitle(), note.getNoteDescription()));
+	public int createNote(Note note, String userName) {
+		User currentUser = userMapper.findUserByUserName(userName);
+		return noteMapper.insertNote(new Note(null, note.getNoteTitle(), note.getNoteDescription(), currentUser.getUserId()));
 	}
 	
 

@@ -1,25 +1,35 @@
 package com.udacity.jwdnd.course1.cloudstorage;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
-import org.junit.jupiter.api.*;
+import java.io.File;
+
+import javax.annotation.Resource;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
-import java.io.File;
+import com.udacity.jwdnd.course1.cloudstorage.mapper.NoteMapper;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
 	@LocalServerPort
 	private int port;
+	
+	@Resource
+	private NoteMapper noteMapper;
 
 	private WebDriver driver;
 
@@ -198,13 +208,43 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
+	public void createNewNote() {
+		
+		String noteTitle = "New note";
+		String noteDescription = "Description for the note";
+		
+		// Create a test account
+		doMockSignUp("NoteTestAccount", "Test", "LFT", "123");
+		doLogIn("LFT", "123");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
+		WebElement noteSelectButton = driver.findElement(By.id("nav-notes-tab"));
+		noteSelectButton.click();
+		WebElement addNewNoteButton = driver.findElement(By.id("add-new-note-button"));
+		addNewNoteButton.click();
+		WebElement noteTitleField = driver.findElement(By.id("note-title"));
+		noteTitleField.click();
+		noteTitleField.sendKeys(noteTitle);
+		WebElement noteDescriptionField = driver.findElement(By.id("note-description"));
+		noteDescriptionField.click();
+		noteDescriptionField.sendKeys(noteDescription);
+		WebElement saveChangesButton = driver.findElement(By.id("note-save-changes"));
+		saveChangesButton.click();
+		
+		//compare with database state
+		Assertions.assertEquals(noteTitle, noteMapper.getNoteByTitle(noteTitle).getNoteTitle());
+		Assertions.assertEquals(noteDescription, noteMapper.getNoteByTitle(noteTitle).getNoteDescription());
+		Assertions.assertEquals(1, noteMapper.getNoteByTitle(noteTitle).getUserId());
+	}
+
+	@Test
 	public void unauthorizedUserAccess() {
 		driver.get("http://localhost:" + this.port + "/login");
 		Assertions.assertTrue(driver.getCurrentUrl().contains("login"));
-		
+
 		driver.get("http://localhost:" + this.port + "/signup");
 		Assertions.assertTrue(driver.getCurrentUrl().contains("signup"));
-		
+
 		driver.get("http://localhost:" + this.port + "/home");
 		Assertions.assertFalse(driver.getPageSource().contains("home"));
 	}
