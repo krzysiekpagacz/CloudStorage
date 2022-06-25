@@ -8,24 +8,34 @@ public class User {
 	private String userName;
 	private String salt;
 	private String password;
-	private String firtName;
+	private String firstName;
 	private String lastName;
 	private List<Note> notes;
 	private List<File> files;
 	private List<Credential> credentials;
 	
-	public User(Integer userId, String userName, String salt, String password, String firtName, String lastName,
-			List<Note> notes, List<File> files, List<Credential> credentials) {
+//	public User(Integer userId, String userName, String salt, String password, String firtName, String lastName,
+//			List<Note> notes, List<File> files, List<Credential> credentials) {
+//		super();
+//		this.userId = userId;
+//		this.userName = userName;
+//		this.salt = salt;
+//		this.password = password;
+//		this.firstName = firstName;
+//		this.lastName = lastName;
+//		this.notes = notes;
+//		this.files = files;
+//		this.credentials = credentials;
+//	}
+
+	public User(Integer userId, String userName, String salt, String password, String firtName, String lastName) {
 		super();
 		this.userId = userId;
 		this.userName = userName;
 		this.salt = salt;
 		this.password = password;
-		this.firtName = firtName;
+		this.firstName = firstName;
 		this.lastName = lastName;
-		this.notes = notes;
-		this.files = files;
-		this.credentials = credentials;
 	}
 
 	public Integer getUserId() {
@@ -60,12 +70,12 @@ public class User {
 		this.password = password;
 	}
 
-	public String getFirtName() {
-		return firtName;
+	public String getFirstName() {
+		return firstName;
 	}
 
-	public void setFirtName(String firtName) {
-		this.firtName = firtName;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
 
 	public String getLastName() {
