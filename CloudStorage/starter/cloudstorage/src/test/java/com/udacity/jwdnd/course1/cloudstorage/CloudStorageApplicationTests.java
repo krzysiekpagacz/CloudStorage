@@ -199,32 +199,10 @@ class CloudStorageApplicationTests {
 
 	@Test
 	public void unauthorizedUserAccess() {
-//		String userName = "John";
-//		String password = "Doe";
 		driver.get("http://localhost:" + this.port + "/login");
-		System.out.println(driver.getCurrentUrl());
-		System.out.println("----------------------------------");
-		System.out.println(driver.getPageSource());
 		Assertions.assertTrue(driver.getCurrentUrl().contains("login"));
-//		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
-//
-//		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("inputUsername")));
-//		WebElement loginUserName = driver.findElement(By.id("inputUsername"));
-//		loginUserName.click();
-//		loginUserName.sendKeys(userName);
-//
-//		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("inputPassword")));
-//		WebElement loginPassword = driver.findElement(By.id("inputPassword"));
-//		loginPassword.click();
-//		loginPassword.sendKeys(password);
-//
-//		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-button")));
-//		WebElement loginButton = driver.findElement(By.id("login-button"));
-//		loginButton.click();
-//		Assertions.assertTrue(driver.getPageSource().contains("Login"));
 		
 		driver.get("http://localhost:" + this.port + "/signup");
-		System.out.println(driver.getCurrentUrl());
 		Assertions.assertTrue(driver.getCurrentUrl().contains("signup"));
 		
 		driver.get("http://localhost:" + this.port + "/home");

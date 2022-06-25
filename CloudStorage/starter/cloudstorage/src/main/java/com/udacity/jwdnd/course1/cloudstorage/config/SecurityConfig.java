@@ -31,6 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.formLogin().loginPage("/login").permitAll();
 
 		http.formLogin().defaultSuccessUrl("/home", true);
+		http.logout().logoutUrl("/logout").logoutSuccessUrl("/login");
 
 		http.csrf().disable(); // in order to log into h2 console in browser
 		http.headers().frameOptions().disable(); // in order to log into h2 console in browser
