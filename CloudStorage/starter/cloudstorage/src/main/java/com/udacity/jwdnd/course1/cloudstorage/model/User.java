@@ -28,8 +28,7 @@ public class User {
 //		this.credentials = credentials;
 //	}
 
-	public User(Integer userId, String userName, String salt, String password, String firtName, String lastName) {
-		super();
+	public User(Integer userId, String userName, String salt, String password, String firstName, String lastName) {
 		this.userId = userId;
 		this.userName = userName;
 		this.salt = salt;
