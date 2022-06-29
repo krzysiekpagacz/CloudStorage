@@ -233,6 +233,8 @@ class CloudStorageApplicationTests {
 
 		notePage.goToNotesTab();
 		Thread.sleep(5000);
+		
+		// verifies that the note details are visible in the note list.
 
 //		WebElement currentNoteTitle = driver.findElement(By.xpath("//th[@id='current-note-title']"));
 //		Assertions.assertEquals(noteTitle, currentNoteTitle.getText());
