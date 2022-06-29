@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
 import com.udacity.jwdnd.course1.cloudstorage.mapper.NoteMapper;
+import com.udacity.jwdnd.course1.cloudstorage.page_objects.NotePage;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
@@ -214,7 +215,6 @@ class CloudStorageApplicationTests {
 
 		String noteTitle = "New note";
 		String noteDescription = "Description for the note";
-		int numberOfNotesCreated = 5;
 
 		// Create a test account
 		doMockSignUp("NoteTestAccount", "Test", "fakeNotesUser", "123");
@@ -226,21 +226,14 @@ class CloudStorageApplicationTests {
 		notePage.createNewNote(noteTitle, noteDescription);
 		notePage.saveChanges();
 
+		notePage.goToNotesTab();
+		Assertions.assertEquals(noteTitle, notePage.getTitle());
+		Assertions.assertEquals(noteDescription, notePage.getDescription());
+
 		// compare with database state
 		Assertions.assertEquals(noteTitle, noteMapper.getNoteByTitle(noteTitle).getNoteTitle());
 		Assertions.assertEquals(noteDescription, noteMapper.getNoteByTitle(noteTitle).getNoteDescription());
 		Assertions.assertEquals(1, noteMapper.getNoteByTitle(noteTitle).getUserId());
-
-		notePage.goToNotesTab();
-		Thread.sleep(5000);
-		
-		// verifies that the note details are visible in the note list.
-
-//		WebElement currentNoteTitle = driver.findElement(By.xpath("//th[@id='current-note-title']"));
-//		Assertions.assertEquals(noteTitle, currentNoteTitle.getText());
-//
-//		WebElement currentNoteDesc = driver.findElement(By.id("current-note-desc"));
-//		Assertions.assertEquals(noteDescription, currentNoteDesc.getText());
 	}
 
 	@Test
@@ -249,13 +242,12 @@ class CloudStorageApplicationTests {
 		String noteDescription = "Description for the note";
 		int numberOfNotesCreated = 5;
 
-		// Create a test account
 		doMockSignUp("NoteTestAccount", "Test", "fakeNotesUser", "123");
 		doLogIn("fakeNotesUser", "123");
 		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
 
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < numberOfNotesCreated; i++) {
 			noteTitle = noteTitle + String.valueOf(i);
 			noteDescription = noteDescription + String.valueOf(i);
 			notePage.goToNotesTab();
@@ -264,10 +256,7 @@ class CloudStorageApplicationTests {
 			noteTitle = "New note";
 			noteDescription = "Description for the note";
 		}
-
-		notePage.goToNotesTab();
-		Thread.sleep(5000);
-
+		
 		Assertions.assertEquals(numberOfNotesCreated, notePage.getNumberOfNotes());
 	}
 

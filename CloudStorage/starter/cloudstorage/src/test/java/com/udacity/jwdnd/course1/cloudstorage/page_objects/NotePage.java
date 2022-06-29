@@ -1,4 +1,4 @@
-package com.udacity.jwdnd.course1.cloudstorage;
+package com.udacity.jwdnd.course1.cloudstorage.page_objects;
 
 import java.util.List;
 
@@ -25,6 +25,12 @@ public class NotePage {
 	private WebElement saveButton;
 	
 	@FindBy(xpath = "/html/body/div/div[2]/div/div[2]/div[1]/table/tbody/tr/th")
+	private WebElement titleField;
+	
+	@FindBy(xpath = "/html/body/div/div[2]/div/div[2]/div[1]/table/tbody/tr/td[2]")
+	private WebElement descriptionField;
+	
+	@FindBy(xpath = "/html/body/div/div[2]/div/div[2]/div[1]/table/tbody/tr/th")
 	private List<WebElement> notesList;
 	
 	public NotePage(WebDriver driver) {
@@ -49,5 +55,13 @@ public class NotePage {
 	
 	public int getNumberOfNotes() {
 		return notesList.size();
+	}
+	
+	public String getTitle() {
+		return titleField.getText();
+	}
+	
+	public String getDescription() {
+		return descriptionField.getText();
 	}
 }
