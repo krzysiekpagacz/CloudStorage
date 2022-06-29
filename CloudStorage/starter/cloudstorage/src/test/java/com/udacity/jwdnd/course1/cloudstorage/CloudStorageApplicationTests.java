@@ -27,11 +27,12 @@ class CloudStorageApplicationTests {
 
 	@LocalServerPort
 	private int port;
-	
+
 	@Resource
 	private NoteMapper noteMapper;
 
 	private WebDriver driver;
+	private NotePage notePage;
 
 	@BeforeAll
 	static void beforeAll() {
@@ -41,6 +42,7 @@ class CloudStorageApplicationTests {
 	@BeforeEach
 	public void beforeEach() {
 		this.driver = new FirefoxDriver();
+		this.notePage = new NotePage(this.driver);
 	}
 
 	@AfterEach
@@ -208,33 +210,63 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
-	public void createNewNote() {
-		
+	public void createNewNote() throws InterruptedException {
+
 		String noteTitle = "New note";
 		String noteDescription = "Description for the note";
-		
+		int numberOfNotesCreated = 5;
+
 		// Create a test account
-		doMockSignUp("NoteTestAccount", "Test", "LFT", "123");
-		doLogIn("LFT", "123");
+		doMockSignUp("NoteTestAccount", "Test", "fakeNotesUser", "123");
+		doLogIn("fakeNotesUser", "123");
 		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
-		WebElement noteSelectButton = driver.findElement(By.id("nav-notes-tab"));
-		noteSelectButton.click();
-		WebElement addNewNoteButton = driver.findElement(By.id("add-new-note-button"));
-		addNewNoteButton.click();
-		WebElement noteTitleField = driver.findElement(By.id("note-title"));
-		noteTitleField.click();
-		noteTitleField.sendKeys(noteTitle);
-		WebElement noteDescriptionField = driver.findElement(By.id("note-description"));
-		noteDescriptionField.click();
-		noteDescriptionField.sendKeys(noteDescription);
-		WebElement saveChangesButton = driver.findElement(By.id("note-save-changes"));
-		saveChangesButton.click();
-		
-		//compare with database state
+
+		notePage.goToNotesTab();
+		notePage.createNewNote(noteTitle, noteDescription);
+		notePage.saveChanges();
+
+		// compare with database state
 		Assertions.assertEquals(noteTitle, noteMapper.getNoteByTitle(noteTitle).getNoteTitle());
 		Assertions.assertEquals(noteDescription, noteMapper.getNoteByTitle(noteTitle).getNoteDescription());
 		Assertions.assertEquals(1, noteMapper.getNoteByTitle(noteTitle).getUserId());
+
+		notePage.goToNotesTab();
+		Thread.sleep(5000);
+
+//		WebElement currentNoteTitle = driver.findElement(By.xpath("//th[@id='current-note-title']"));
+//		Assertions.assertEquals(noteTitle, currentNoteTitle.getText());
+//
+//		WebElement currentNoteDesc = driver.findElement(By.id("current-note-desc"));
+//		Assertions.assertEquals(noteDescription, currentNoteDesc.getText());
+	}
+
+	@Test
+	public void createManyNotes() throws InterruptedException {
+		String noteTitle = "New note";
+		String noteDescription = "Description for the note";
+		int numberOfNotesCreated = 5;
+
+		// Create a test account
+		doMockSignUp("NoteTestAccount", "Test", "fakeNotesUser", "123");
+		doLogIn("fakeNotesUser", "123");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
+
+		for (int i = 0; i < 5; i++) {
+			noteTitle = noteTitle + String.valueOf(i);
+			noteDescription = noteDescription + String.valueOf(i);
+			notePage.goToNotesTab();
+			notePage.createNewNote(noteTitle, noteDescription);
+			notePage.saveChanges();
+			noteTitle = "New note";
+			noteDescription = "Description for the note";
+		}
+
+		notePage.goToNotesTab();
+		Thread.sleep(5000);
+
+		Assertions.assertEquals(numberOfNotesCreated, notePage.getNumberOfNotes());
 	}
 
 	@Test
