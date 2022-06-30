@@ -1,6 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +26,10 @@ public class HomeCotroller {
 	}
 
 	@GetMapping
-	public String homeView() {
+	public String homeView(Authentication auth, Model model) {
+		auth = SecurityContextHolder.getContext().getAuthentication();
+		Integer userId = userService.getUser(auth.getName()).getUserId();
+		model.addAttribute("notes", noteService.getUserNotes(userId));
 		return "home";
 	}
 
@@ -34,7 +38,7 @@ public class HomeCotroller {
 		String userName = auth.getName();
 		noteForm.setUserId(userService.getUser(userName).getUserId());
 		noteService.createNote(noteForm);
-		model.addAttribute("notes", this.noteService.getUserNotes());
+		model.addAttribute("notes", this.noteService.getAllNotes());
 		return "home";
 	}
 

@@ -11,13 +11,13 @@ import com.udacity.jwdnd.course1.cloudstorage.model.Note;
 
 @Service
 public class NoteService {
-	
+
 	private NoteMapper noteMapper;
 
 	public NoteService(NoteMapper noteMapper) {
 		this.noteMapper = noteMapper;
 	}
-	
+
 	public int createNote(NoteForm noteForm) {
 		Note note = new Note();
 		note.setNoteTitle(noteForm.getNoteTitle());
@@ -25,8 +25,12 @@ public class NoteService {
 		note.setUserId(noteForm.getUserId());
 		return noteMapper.insertNote(note);
 	}
-	
-	public List<Note> getUserNotes(){
+
+	public List<Note> getUserNotes(Integer userId) {
+		return noteMapper.getUserNotes(userId);
+	}
+
+	public Object getAllNotes() {
 		return noteMapper.getAllNotes();
 	}
 }
