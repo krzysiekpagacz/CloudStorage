@@ -33,13 +33,4 @@ public class HomeCotroller {
 		return "home";
 	}
 
-	@PostMapping
-	public String addNewNote(@ModelAttribute NoteForm noteForm, Authentication auth, Model model) {
-		String userName = auth.getName();
-		noteForm.setUserId(userService.getUser(userName).getUserId());
-		noteService.createNote(noteForm);
-		model.addAttribute("notes", this.noteService.getAllNotes());
-		return "home";
-	}
-
 }

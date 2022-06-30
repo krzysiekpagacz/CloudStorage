@@ -30,7 +30,15 @@ public class NoteService {
 		return noteMapper.getUserNotes(userId);
 	}
 
-	public Object getAllNotes() {
+	public List<Note> getAllNotes() {
 		return noteMapper.getAllNotes();
+	}
+	
+	public int updateNote(NoteForm noteForm) {
+		Note note = new Note();
+		note.setNoteTitle(noteForm.getNoteTitle());
+		note.setNoteDescription(noteForm.getNoteDescription());
+		note.setUserId(noteForm.getUserId());
+		return noteMapper.updateNote(note);
 	}
 }
