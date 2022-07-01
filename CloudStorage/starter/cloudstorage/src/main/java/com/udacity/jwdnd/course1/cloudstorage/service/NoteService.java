@@ -34,11 +34,11 @@ public class NoteService {
 		return noteMapper.getAllNotes();
 	}
 	
-	public int updateNote(NoteForm noteForm) {
-		Note note = new Note();
-		note.setNoteTitle(noteForm.getNoteTitle());
-		note.setNoteDescription(noteForm.getNoteDescription());
-		note.setUserId(noteForm.getUserId());
+	public int updateNote(Note note) {
 		return noteMapper.updateNote(note);
+	}
+
+	public void deleteNote(Integer noteId) {
+		noteMapper.deleteNote(noteId);
 	}
 }
