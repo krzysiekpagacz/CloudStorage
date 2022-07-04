@@ -11,7 +11,6 @@ public class File {
 	private ByteBuffer fileData;
 	
 	public File(Integer fileId, String fileName, String contentType, String fileSize, ByteBuffer fileData) {
-		super();
 		this.fileId = fileId;
 		this.fileName = fileName;
 		this.contentType = contentType;
