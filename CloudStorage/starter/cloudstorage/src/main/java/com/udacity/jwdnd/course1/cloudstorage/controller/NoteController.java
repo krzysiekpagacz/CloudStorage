@@ -60,10 +60,16 @@ public class NoteController {
 		return "result";
 	}
 	
-	@GetMapping("/note/{noteId}/delete")
+	@GetMapping("/{noteId}/delete")
 	public String deleteNote(@PathVariable Integer noteId, Model model) {
-		noteService.deleteNote(noteId);
-		model.addAttribute("successMsg", "Note has been deleted!");
+		try {
+			noteService.deleteNote(noteId);
+			model.addAttribute("isSuccess", true);
+			model.addAttribute("successMsg", "Note has been deleted!");
+		} catch(Exception e) {
+			model.addAttribute("isError", true);
+			model.addAttribute("errorMsg", "An error occured during Note deletion.");
+		}
 		return "result";
 	}
 
