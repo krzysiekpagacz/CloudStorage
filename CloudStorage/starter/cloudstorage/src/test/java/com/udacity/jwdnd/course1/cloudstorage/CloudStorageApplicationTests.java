@@ -102,8 +102,9 @@ class CloudStorageApplicationTests {
 		 * "success-msg" and the sign-up // success message below depening on the rest
 		 * of your code.
 		 */
-		Assertions.assertTrue(
-				driver.findElement(By.id("signup-success-msg")).getText().contains("You successfully signed up!"));
+//		Assertions.assertTrue(
+//				driver.findElement(By.id("signup-success-msg")).getText().contains("You successfully signed up!"));
+		Assertions.assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
 	}
 
 	/**
@@ -213,7 +214,7 @@ class CloudStorageApplicationTests {
 	@Test
 	public void createNewNote() throws InterruptedException {
 
-		String noteTitle = "New note";
+		String noteTitle = "New test note";
 		String noteDescription = "Description for the note";
 
 		// Create a test account
@@ -221,12 +222,13 @@ class CloudStorageApplicationTests {
 		doLogIn("fakeNotesUser", "123");
 		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
-
 		notePage.goToNotesTab();
 		notePage.createNewNote(noteTitle, noteDescription);
 		notePage.saveChanges();
 
+		notePage.goToHomePage();
 		notePage.goToNotesTab();
+
 		Assertions.assertEquals(noteTitle, notePage.getTitle());
 		Assertions.assertEquals(noteDescription, notePage.getDescription());
 
@@ -253,10 +255,11 @@ class CloudStorageApplicationTests {
 			notePage.goToNotesTab();
 			notePage.createNewNote(noteTitle, noteDescription);
 			notePage.saveChanges();
+			notePage.goToHomePage();
 			noteTitle = "New note";
 			noteDescription = "Description for the note";
 		}
-		
+
 		Assertions.assertEquals(numberOfNotesCreated, notePage.getNumberOfNotes());
 	}
 

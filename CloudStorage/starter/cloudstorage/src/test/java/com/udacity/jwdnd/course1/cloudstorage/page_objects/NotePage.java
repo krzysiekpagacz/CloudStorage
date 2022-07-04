@@ -30,6 +30,9 @@ public class NotePage {
 	@FindBy(xpath = "/html/body/div/div[2]/div/div[2]/div[1]/table/tbody/tr/td[2]")
 	private WebElement descriptionField;
 	
+	@FindBy(xpath = "/html/body/div/div/span/a")
+	private WebElement homePage;
+	
 	@FindBy(xpath = "/html/body/div/div[2]/div/div[2]/div[1]/table/tbody/tr/th")
 	private List<WebElement> notesList;
 	
@@ -54,14 +57,18 @@ public class NotePage {
 	}
 	
 	public int getNumberOfNotes() {
-		return notesList.size();
+		return this.notesList.size();
 	}
 	
 	public String getTitle() {
-		return titleField.getText();
+		return this.titleField.getText();
 	}
 	
 	public String getDescription() {
-		return descriptionField.getText();
+		return this.descriptionField.getText();
+	}
+	
+	public void goToHomePage() {
+		this.homePage.click();
 	}
 }
