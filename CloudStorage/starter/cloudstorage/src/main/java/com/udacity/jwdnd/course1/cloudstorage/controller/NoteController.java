@@ -30,35 +30,43 @@ public class NoteController {
 	public String addNewNote(@ModelAttribute NoteForm noteForm, Authentication auth, Model model) {
 		String userName = auth.getName();
 		noteForm.setUserId(userService.getUser(userName).getUserId());
-		try {
-			noteService.createNote(noteForm);
+		
+		if (noteForm.getNoteId() == null) {			
+			try {
+				noteService.createNote(noteForm);
+				model.addAttribute("isSuccess", true);
+				model.addAttribute("successMsg", "Note has been created!");
+			} catch (Exception e) {
+				model.addAttribute("isError", true);
+				model.addAttribute("errorMsg", "An error occured during creation of a Note.");
+			}
+		} else {
+			noteService.updateNote(noteForm);
 			model.addAttribute("isSuccess", true);
-			model.addAttribute("successMsg", "Note has been created!");
-		} catch (Exception e) {
-			model.addAttribute("isError", true);
-			model.addAttribute("errorMsg", "An error occured during creation of a Note.");
+			model.addAttribute("successMsg", "Note has been updated!");
 		}
+		
 		model.addAttribute("notes", this.noteService.getAllNotes());
-		model.addAttribute("createNote", true);
+		
 		return "result";
 	}
 
-	@PostMapping("/update")
-	public String updateNote(@ModelAttribute Note note, Authentication auth, Model model) {
-		String userName = auth.getName();
-		note.setUserId(userService.getUser(userName).getUserId());
-		try {
-			noteService.updateNote(note);
-			model.addAttribute("isSuccess", true);
-			model.addAttribute("successMsg", "Note has been updated!");
-			model.addAttribute("createNote", false);
-		}
-		catch (Exception e) {
-			model.addAttribute("isError", true);
-			model.addAttribute("errorMsg", "An error occured during Note update.");
-		}
-		return "result";
-	}
+//	@PostMapping("/update")
+//	public String updateNote(@ModelAttribute Note note, Authentication auth, Model model) {
+//		String userName = auth.getName();
+//		note.setUserId(userService.getUser(userName).getUserId());
+//		try {
+//			noteService.updateNote(note);
+//			model.addAttribute("isSuccess", true);
+//			model.addAttribute("successMsg", "Note has been updated!");
+//			model.addAttribute("createNote", false);
+//		}
+//		catch (Exception e) {
+//			model.addAttribute("isError", true);
+//			model.addAttribute("errorMsg", "An error occured during Note update.");
+//		}
+//		return "result";
+//	}
 	
 	@GetMapping("/{noteId}/delete")
 	public String deleteNote(@PathVariable Integer noteId, Model model) {

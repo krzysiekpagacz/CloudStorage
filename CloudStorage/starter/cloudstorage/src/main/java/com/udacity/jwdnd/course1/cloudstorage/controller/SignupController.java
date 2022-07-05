@@ -42,6 +42,8 @@ public class SignupController {
 		
 		if(signupError == null) {
 			model.addAttribute("signupSuccess", true);
+			model.addAttribute("userCreated", true);
+			model.addAttribute("userCreatedMsg", "User " + user.getUserName() + "successfully created!");
 		} else {
 			model.addAttribute("signupError", signupError);
 		}

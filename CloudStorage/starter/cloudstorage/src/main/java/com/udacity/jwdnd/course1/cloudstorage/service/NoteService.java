@@ -23,6 +23,7 @@ public class NoteService {
 		note.setNoteTitle(noteForm.getNoteTitle());
 		note.setNoteDescription(noteForm.getNoteDescription());
 		note.setUserId(noteForm.getUserId());
+		note.setNoteId(noteForm.getNoteId());
 		return noteMapper.insertNote(note);
 	}
 
@@ -34,7 +35,12 @@ public class NoteService {
 		return noteMapper.getAllNotes();
 	}
 	
-	public int updateNote(Note note) {
+	public int updateNote(NoteForm noteForm) {
+		Note note = new Note();
+		note.setUserId(noteForm.getUserId());
+		note.setNoteId(noteForm.getNoteId());
+		note.setNoteTitle(noteForm.getNoteTitle());
+		note.setNoteDescription(noteForm.getNoteDescription());
 		return noteMapper.updateNote(note);
 	}
 
