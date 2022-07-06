@@ -50,23 +50,6 @@ public class NoteController {
 		
 		return "result";
 	}
-
-//	@PostMapping("/update")
-//	public String updateNote(@ModelAttribute Note note, Authentication auth, Model model) {
-//		String userName = auth.getName();
-//		note.setUserId(userService.getUser(userName).getUserId());
-//		try {
-//			noteService.updateNote(note);
-//			model.addAttribute("isSuccess", true);
-//			model.addAttribute("successMsg", "Note has been updated!");
-//			model.addAttribute("createNote", false);
-//		}
-//		catch (Exception e) {
-//			model.addAttribute("isError", true);
-//			model.addAttribute("errorMsg", "An error occured during Note update.");
-//		}
-//		return "result";
-//	}
 	
 	@GetMapping("/{noteId}/delete")
 	public String deleteNote(@PathVariable Integer noteId, Model model) {
