@@ -38,4 +38,8 @@ public class FileService {
 		return fileMapper.getFileById(fileId);
 	}
 
+	public List<File> getUserFiles(Integer userId) {
+		return fileMapper.getUserFiles(userId);
+	}
+
 }

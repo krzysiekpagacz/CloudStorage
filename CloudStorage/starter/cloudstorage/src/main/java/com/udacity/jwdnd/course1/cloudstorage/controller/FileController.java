@@ -1,6 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -60,6 +61,16 @@ public class FileController {
 	@PostMapping("/file-upload")
 	public String handleFileUpload(@RequestParam("fileUpload") MultipartFile file, Authentication auth, Model model) {
 		Integer userId = userService.getUser(auth.getName()).getUserId();
+		List<File> userFiles = fileService.getUserFiles(userId);
+		
+		for(File userFile : userFiles) {
+			if(userFile.getFileName().equals(file.getOriginalFilename())) {
+				model.addAttribute("isError", true);
+				model.addAttribute("errorMsg", "File with the name " + file.getOriginalFilename() + " already exists.");
+				return "result";
+			}
+		}
+		
 		try {
 			this.fileService.uploadFile(file, userId);
 			model.addAttribute("isSuccess", true);
