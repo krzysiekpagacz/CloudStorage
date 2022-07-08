@@ -19,14 +19,14 @@ public interface FileMapper {
 	
 	@Select("SELECT * FROM FILES")
 	public List<File> getAllFiles();
+	
+	@Select("SELECT * FROM FILES WHERE userid = #{userId}")
+	public List<File> getUserFiles(Integer userId);
 
 	@Delete("DELETE FROM FILES WHERE fileid=#{fileId}")
 	public void deleteFile(Integer fileId);
 
 	@Select("SELECT * FROM FILES WHERE fileid = #{fileId}")
 	public File getFileById(Integer fileId);
-
-	@Select("SELECT * FROM FILES WHERE userid = #{userId}")
-	public List<File> getUserFiles(Integer userId);
 
 }

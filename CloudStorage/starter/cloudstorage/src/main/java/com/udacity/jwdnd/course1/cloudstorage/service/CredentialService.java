@@ -28,8 +28,8 @@ public class CredentialService {
 		return credMapper.createCredential(credential);
 	}
 
-	public List<Credential> getUserCredentials() {
-		return credMapper.getUserCredentials();
+	public List<Credential> getUserCredentials(Integer userId) {
+		return credMapper.getUserCredentials(userId);
 	}
 
 	public int updateCredentials(CredentialForm credForm) {

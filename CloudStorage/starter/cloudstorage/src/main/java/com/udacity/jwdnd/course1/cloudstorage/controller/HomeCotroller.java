@@ -33,8 +33,8 @@ public class HomeCotroller {
 	public String homeView(Authentication auth, Model model) {
 		Integer userId = userService.getUser(auth.getName()).getUserId();
 		model.addAttribute("notes", noteService.getUserNotes(userId));
-		model.addAttribute("credentials", credentialService.getUserCredentials());
-		model.addAttribute("files", fileService.getAllFiles());
+		model.addAttribute("credentials", credentialService.getUserCredentials(userId));
+		model.addAttribute("files", fileService.getUserFiles(userId));
 		return "home";
 	}
 

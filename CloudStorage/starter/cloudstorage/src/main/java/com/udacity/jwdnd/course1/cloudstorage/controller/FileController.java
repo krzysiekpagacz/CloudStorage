@@ -23,10 +23,10 @@ import com.udacity.jwdnd.course1.cloudstorage.service.UserService;
 
 @Controller
 public class FileController {
-	
+
 	private FileService fileService;
 	private UserService userService;
-	
+
 	public FileController(FileService fileService, UserService userService) {
 		this.fileService = fileService;
 		this.userService = userService;
@@ -38,47 +38,57 @@ public class FileController {
 			this.fileService.deleteFile(fileId);
 			model.addAttribute("isSuccess", true);
 			model.addAttribute("successMsg", "File has been deleted!");
-		} catch(Exception e) {
+		} catch (Exception e) {
 			model.addAttribute("isError", true);
 			model.addAttribute("errorMsg", "An error occured during File delete.");
 		}
 		return "result";
 	}
-	
-	@GetMapping(value = "/{fileId}/download",
-			produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+
+	@GetMapping(value = "/{fileId}/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
 	public ResponseEntity<Resource> downloadFile(@PathVariable("fileId") Integer fileId) {
-		
+
 		File file = fileService.getFileById(fileId);
 		ByteArrayResource resource = new ByteArrayResource(file.getFileData());
 
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; fileName=\"" + file.getFileName() + "\"")
-				.contentType(MediaType.parseMediaType(file.getContentType()))
-				.body(resource);
+				.contentType(MediaType.parseMediaType(file.getContentType())).body(resource);
 	}
-	
+
 	@PostMapping("/file-upload")
-	public String handleFileUpload(@RequestParam("fileUpload") MultipartFile file, Authentication auth, Model model) {
+	public String handleFileUpload(@RequestParam("fileUpload") MultipartFile file, Authentication auth, Model model)
+			throws IOException {
+		String errorMsg = null;
 		Integer userId = userService.getUser(auth.getName()).getUserId();
 		List<File> userFiles = fileService.getUserFiles(userId);
-		
-		for(File userFile : userFiles) {
-			if(userFile.getFileName().equals(file.getOriginalFilename())) {
-				model.addAttribute("isError", true);
-				model.addAttribute("errorMsg", "File with the name " + file.getOriginalFilename() + " already exists.");
-				return "result";
+
+		if (file.getBytes().length == 0) {
+			errorMsg = "File has not been choosen yet!";
+		}
+
+		if (errorMsg == null) {
+			for (File userFile : userFiles) {
+				if (userFile.getFileName().equals(file.getOriginalFilename())) {
+					errorMsg = "File with the name " + file.getOriginalFilename() + " already exists.";
+				}
 			}
 		}
-		
-		try {
-			this.fileService.uploadFile(file, userId);
-			model.addAttribute("isSuccess", true);
-			model.addAttribute("successMsg", "File " + file.getOriginalFilename() + " has been uploaded!");
-		} catch (IOException e) {
+
+		if (errorMsg == null) {
+			try {
+				this.fileService.uploadFile(file, userId);
+				model.addAttribute("isSuccess", true);
+				model.addAttribute("successMsg", "File " + file.getOriginalFilename() + " has been uploaded!");
+			} catch (IOException e) {
+				model.addAttribute("isError", true);
+				model.addAttribute("errorMsg", "An error occured during File upload.");
+			}
+		} else {
 			model.addAttribute("isError", true);
-			model.addAttribute("errorMsg", "An error occured during File upload.");
+			model.addAttribute("errorMsg", errorMsg);
 		}
+
 		return "result";
 	}
 

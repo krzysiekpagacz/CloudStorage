@@ -29,26 +29,20 @@ public class CredentialController {
 	public String createCredential(@ModelAttribute CredentialForm credForm, Authentication auth, Model model) {
 		String userName = auth.getName();
 		Integer userId = userService.getUser(userName).getUserId();
-		System.out.println("***********************************");
-		System.out.println(userId);
 		credForm.setUserId(userId);
 		
 		if (credForm.getCredentialId() == null) {
-			System.out.println("***********************************");
-			System.out.println(credForm.getUserId());
 			credentialService.createCredential(credForm);
 			model.addAttribute("isSuccess", true);
 			model.addAttribute("successMsg", "Credential has been created!");
 //			model.addAttribute("createCredential", true);
 		} else {
-			System.out.println("***********************************");
-			System.out.println(credForm.getUserId());
 			credentialService.updateCredentials(credForm);
 			model.addAttribute("isSuccess", true);
 			model.addAttribute("successMsg", "Credential has been updated!");
 		}
 		
-		model.addAttribute("credentials", this.credentialService.getUserCredentials());
+		model.addAttribute("credentials", this.credentialService.getUserCredentials(userId));
 		
 		return "result";
 	}
