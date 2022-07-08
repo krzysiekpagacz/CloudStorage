@@ -1,5 +1,8 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
+import java.security.SecureRandom;
+import java.util.Base64;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,18 +29,18 @@ public class CredentialController {
 	}
 
 	@PostMapping("/create")
-	public String createCredential(@ModelAttribute CredentialForm credForm, Authentication auth, Model model) {
-		String userName = auth.getName();
-		Integer userId = userService.getUser(userName).getUserId();
+	public String createCredential(@ModelAttribute("credForm") CredentialForm credForm, Authentication auth, Model model) {
+		Integer userId = userService.getUser(auth.getName()).getUserId();
 		credForm.setUserId(userId);
+		credForm.setKey(prepareEncodedKey());
 		
 		if (credForm.getCredentialId() == null) {
-			credentialService.createCredential(credForm);
+			credentialService.createOrUpdateCredentials(credForm, "create");
 			model.addAttribute("isSuccess", true);
 			model.addAttribute("successMsg", "Credential has been created!");
 //			model.addAttribute("createCredential", true);
 		} else {
-			credentialService.updateCredentials(credForm);
+			credentialService.createOrUpdateCredentials(credForm, "update");
 			model.addAttribute("isSuccess", true);
 			model.addAttribute("successMsg", "Credential has been updated!");
 		}
@@ -48,7 +51,7 @@ public class CredentialController {
 	}
 	
 	@GetMapping("/{credentialId}/delete")
-	public String deleteCredential(@PathVariable Integer credentialId, Model model) {
+	public String deleteCredential(@PathVariable("credentialId") Integer credentialId, Model model) {
 		try {
 			credentialService.deleteCredential(credentialId);
 			model.addAttribute("isSuccess", true);
@@ -58,6 +61,13 @@ public class CredentialController {
 			model.addAttribute("errorMsg", "An error occured during Credential deletion.");
 		}
 		return "result";
+	}
+	
+	private String prepareEncodedKey() {
+		SecureRandom random = new SecureRandom();
+		byte[] key = new byte[16];
+		random.nextBytes(key);
+		return Base64.getEncoder().encodeToString(key);
 	}
 
 }

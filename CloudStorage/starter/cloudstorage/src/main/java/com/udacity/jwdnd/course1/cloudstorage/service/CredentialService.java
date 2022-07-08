@@ -12,35 +12,36 @@ import com.udacity.jwdnd.course1.cloudstorage.model.Credential;
 public class CredentialService {
 	
 	private CredentialMapper credMapper;
+	private EncryptionService encryptionService;
 
-	public CredentialService(CredentialMapper credMapper) {
+	public CredentialService(CredentialMapper credMapper, EncryptionService encryptionService) {
 		this.credMapper = credMapper;
-	}
-	
-	public Integer createCredential(CredentialForm credForm) {
-		Credential credential = new Credential();
-		credential.setCredentialId(credForm.getCredentialId());
-		credential.setUrl(credForm.getUrl());
-		credential.setPassword(credForm.getPassword());
-		credential.setUserName(credForm.getUserName());
-		credential.setUserId(credForm.getUserId());
-		credential.setKey("dummy key");
-		return credMapper.createCredential(credential);
+		this.encryptionService = encryptionService;
 	}
 
 	public List<Credential> getUserCredentials(Integer userId) {
 		return credMapper.getUserCredentials(userId);
 	}
-
-	public int updateCredentials(CredentialForm credForm) {
+	
+	public int createOrUpdateCredentials(CredentialForm credForm, String option) {
+		int entryId = 0;
+		String key = credForm.getKey();
+		String password = encryptionService.encryptValue(credForm.getPassword(), key);
+		
 		Credential credential = new Credential();
 		credential.setCredentialId(credForm.getCredentialId());
 		credential.setUrl(credForm.getUrl());
-		credential.setPassword(credForm.getPassword());
 		credential.setUserName(credForm.getUserName());
 		credential.setUserId(credForm.getUserId());
-		credential.setKey("dummy key");
-		return credMapper.updateCredential(credential);
+		credential.setPassword(password);
+		credential.setKey(key);
+		
+		if (option.equals("create")) {
+			entryId = credMapper.createCredential(credential);
+		} else if (option.equals("update")) {
+			entryId = credMapper.updateCredential(credential);
+		}
+		return entryId;
 	}
 
 	public void deleteCredential(Integer credentialId) {

@@ -7,7 +7,8 @@ public class CredentialForm {
 	private String url;
 	private String userName;
 	private String password;
-	
+	private String key;
+
 	public Integer getCredentialId() {
 		return credentialId;
 	}
@@ -37,6 +38,13 @@ public class CredentialForm {
 	}
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	public String getKey() {
+		return key;
+	}
+	
+	public void setKey(String key) {
+		this.key = key;
 	}
 
 }

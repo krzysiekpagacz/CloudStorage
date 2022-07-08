@@ -167,18 +167,15 @@
 									<th style="width: 25%" scope="col">Password</th>
 								</tr>
 							</thead>
-							<tbody th:each="credential : ${credentials}">
-								<tr>
+							<tbody>
+								<tr th:each="credential : ${credentials}">
 									<td>
 										<button type="button" class="btn btn-success"
-											th:onclick="javascript:showCredentialModal(
-										[[${credential.credentialId}]],
-                                                    [[${credential.url}]],
-                                                    [[${credential.userName}]],
-                                                    [[${credential.password}]],
-                                                    [[${credential.key}]])">Edit</button>
-										<a class="btn btn-danger"
-											th:href="@{'/credential/' + ${credential.credentialId} + '/delete'}">Delete</a>
+											th:onclick="showCredentialModal([[${credential.credentialId}]],
+											 [[${credential.url}]],
+											  [[${credential.userName}]],
+											  [[${encryptionService.decryptValue(credential.password, credential.key)}]])">Edit</button>
+										<a class="btn btn-danger" th:href="@{'/credential/' + ${credential.credentialId} + '/delete'}">Delete</a>
 									</td>
 									<th th:text="${credential.url}" scope="row">Example
 										CredentialURL</th>
@@ -210,18 +207,18 @@
 										<div class="form-group">
 											<label for="credential-url" class="col-form-label">URL</label>
 											<input type="text" name="url" class="form-control"
-												id="credential-url" maxlength="100" field="*{url}" required>
+												id="credential-url" maxlength="100" required>
 										</div>
 										<div class="form-group">
 											<label for="credential-username" class="col-form-label">Username</label>
-											<input type="text" name="username" class="form-control"
-												id="credential-username" maxlength="30" field="*{userName}"
+											<input type="text" name="userName" class="form-control"
+												id="credential-username" maxlength="30"
 												required>
 										</div>
 										<div class="form-group">
 											<label for="credential-password" class="col-form-label">Password</label>
 											<input type="text" name="password" class="form-control"
-												id="credential-password" maxlength="30" field="*{password}"
+												id="credential-password" maxlength="30"
 												required>
 										</div>
 										<button id="credentialSubmit" type="submit" class="d-none"></button>
