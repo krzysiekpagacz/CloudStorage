@@ -12,10 +12,7 @@
 <title>Home</title>
 </head>
 <body class="p-3 mb-2 bg-light text-black">
-	<div id="signup-success-msg" th:if="${userCreated}"
-		class="alert alert-dark">
-		<h2 class="display-5" id="success" th:text="${userCreatedMsg}">Success</h2>
-	</div>
+
 	<div class="container">
 		<div id="logoutDiv">
 			<form action="#" th:action="@{/logout}" method="POST">
@@ -39,7 +36,8 @@
 			<div class="tab-content" id="nav-tabContent">
 				<div class="tab-pane fade show active" id="nav-files"
 					role="tabpanel" aria-labelledby="nav-files-tab">
-					<form action="#" enctype="multipart/form-data" th:action="@{/file-upload}" method="POST">
+					<form action="#" enctype="multipart/form-data"
+						th:action="@{/file-upload}" method="POST">
 						<div class="container">
 							<div class="row" style="margin: 1em;">
 								<div class="col-sm-2">
@@ -66,8 +64,10 @@
 							<tbody th:each="file : ${files}">
 								<tr>
 									<td>
-										<a target="_blank" class="btn btn-success" th:href="@{${file.fileId} + '/download'}">Download</a>
-										<a class="btn btn-danger" th:href="@{${file.fileId} + '/delete'}">Delete</a>
+										<a target="_blank" class="btn btn-success"
+											th:href="@{${file.fileId} + '/download'}">Download</a>
+										<a class="btn btn-danger"
+											th:href="@{${file.fileId} + '/delete'}">Delete</a>
 									</td>
 									<th scope="row" th:text="${file.fileName}">ExampleFile.txt</th>
 								</tr>
@@ -101,8 +101,10 @@
 										<a class="btn btn-danger"
 											th:href="@{'/note/' + ${note.noteId} + '/delete'}">Delete</a>
 									</td>
-									<th scope="row" th:text="${note.noteTitle}">Example NoteTitle</th>
-									<td th:text="${note.noteDescription}">Example NoteDescription</td>
+									<th scope="row" th:text="${note.noteTitle}">Example
+										NoteTitle</th>
+									<td th:text="${note.noteDescription}">Example
+										NoteDescription</td>
 								</tr>
 							</tbody>
 						</table>
@@ -175,11 +177,15 @@
                                                     [[${credential.userName}]],
                                                     [[${credential.password}]],
                                                     [[${credential.key}]])">Edit</button>
-										<a class="btn btn-danger" th:href="@{'/credential/' + ${credential.credentialId} + '/delete'}">Delete</a>
+										<a class="btn btn-danger"
+											th:href="@{'/credential/' + ${credential.credentialId} + '/delete'}">Delete</a>
 									</td>
-									<th th:text="${credential.url}" scope="row">Example CredentialURL</th>
-									<td th:text="${credential.userName}">Example Credential Username</td>
-									<td th:text="${credential.password}">Example Credential Password</td>
+									<th th:text="${credential.url}" scope="row">Example
+										CredentialURL</th>
+									<td th:text="${credential.userName}">Example Credential
+										Username</td>
+									<td th:text="${credential.password}">Example Credential
+										Password</td>
 								</tr>
 							</tbody>
 						</table>

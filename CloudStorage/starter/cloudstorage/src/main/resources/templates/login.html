@@ -12,6 +12,13 @@
 <title>Login</title>
 </head>
 <body class="p-3 mb-2 bg-light text-black">
+                <div id="signup-success-msg" th:if="${signupSuccess}" class="alert alert-dark">
+                <p th:text="${signupSuccess}"/>
+                </div>
+                <div id="signup-error-msg" th:if="${signupError}" class="alert alert-danger">
+                    <p th:text="${signupError}"/>
+                </div>
+
 	<div class="container justify-content-center w-25 p-3"
 		style="background-color: #eeeeee; margin-top: 5em;">
 		<h1 class="display-5">Login</h1>
