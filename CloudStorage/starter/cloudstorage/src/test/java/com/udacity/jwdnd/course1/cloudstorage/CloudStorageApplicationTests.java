@@ -2,48 +2,64 @@ package com.udacity.jwdnd.course1.cloudstorage;
 
 import java.io.File;
 
-import javax.annotation.Resource;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
-import com.udacity.jwdnd.course1.cloudstorage.mapper.NoteMapper;
+import com.udacity.jwdnd.course1.cloudstorage.page_objects.CredentialPage;
 import com.udacity.jwdnd.course1.cloudstorage.page_objects.NotePage;
+import com.udacity.jwdnd.course1.cloudstorage.params.EncryptionServiceParameter;
+import com.udacity.jwdnd.course1.cloudstorage.service.CredentialService;
+import com.udacity.jwdnd.course1.cloudstorage.service.EncryptionService;
+import com.udacity.jwdnd.course1.cloudstorage.service.NoteService;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
+@ExtendWith(EncryptionServiceParameter.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
 	@LocalServerPort
 	private int port;
 
-	@Resource
-	private NoteMapper noteMapper;
+	@Autowired
+	private NoteService noteService;
+	
+	@Autowired
+	CredentialService credentialService;
 
 	private WebDriver driver;
 	private NotePage notePage;
+	private CredentialPage credentialPage;
+	
+	private String firstName = "Krzysztof";
+	private String lastName = "Pagacz";
+	private String user = "test user";
+	private String password = "superSecretPassword_";
+	
 
 	@BeforeAll
 	static void beforeAll() {
-		WebDriverManager.firefoxdriver().setup();
+		WebDriverManager.chromedriver().setup();
 	}
 
 	@BeforeEach
-	public void beforeEach() {
-		this.driver = new FirefoxDriver();
+	public void beforeEach(EncryptionService encryptionService) {
+		this.driver = new ChromeDriver();
 		this.notePage = new NotePage(this.driver);
+		this.credentialPage = new CredentialPage(this.driver);
 	}
 
 	@AfterEach
@@ -102,8 +118,6 @@ class CloudStorageApplicationTests {
 		 * "success-msg" and the sign-up // success message below depening on the rest
 		 * of your code.
 		 */
-//		Assertions.assertTrue(
-//				driver.findElement(By.id("signup-success-msg")).getText().contains("You successfully signed up!"));
 		Assertions.assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
 	}
 
@@ -146,7 +160,7 @@ class CloudStorageApplicationTests {
 	@Test
 	public void testRedirection() {
 		// Create a test account
-		doMockSignUp("Redirection", "Test", "RT", "123");
+		doMockSignUp(this.firstName, this.lastName, this.user, this.password);
 
 		// Check if we have been redirected to the log in page.
 		Assertions.assertEquals("http://localhost:" + this.port + "/login", driver.getCurrentUrl());
@@ -165,9 +179,8 @@ class CloudStorageApplicationTests {
 	 */
 	@Test
 	public void testBadUrl() {
-		// Create a test account
-		doMockSignUp("URL", "Test", "UT", "123");
-		doLogIn("UT", "123");
+		doMockSignUp(this.firstName, this.lastName, this.user, this.password);
+		doLogIn(this.user, this.password);
 
 		// Try to access a random made-up URL.
 		driver.get("http://localhost:" + this.port + "/some-random-page");
@@ -188,9 +201,8 @@ class CloudStorageApplicationTests {
 	 */
 	@Test
 	public void testLargeUpload() {
-		// Create a test account
-		doMockSignUp("Large File", "Test", "LFT", "123");
-		doLogIn("LFT", "123");
+		doMockSignUp(this.firstName, this.lastName, this.user, this.password);
+		doLogIn(this.user, this.password);
 
 		// Try to upload an arbitrary large file
 		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
@@ -210,59 +222,7 @@ class CloudStorageApplicationTests {
 		Assertions.assertFalse(driver.getPageSource().contains("HTTP Status 403 – Forbidden"));
 
 	}
-
-	@Test
-	public void createNewNote() throws InterruptedException {
-
-		String noteTitle = "New test note";
-		String noteDescription = "Description for the note";
-
-		// Create a test account
-		doMockSignUp("NoteTestAccount", "Test", "fakeNotesUser", "123");
-		doLogIn("fakeNotesUser", "123");
-		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
-		notePage.goToNotesTab();
-		notePage.createNewNote(noteTitle, noteDescription);
-		notePage.saveChanges();
-
-		notePage.goToHomePage();
-		notePage.goToNotesTab();
-
-		Assertions.assertEquals(noteTitle, notePage.getTitle());
-		Assertions.assertEquals(noteDescription, notePage.getDescription());
-
-		// compare with database state
-		Assertions.assertEquals(noteTitle, noteMapper.getNoteByTitle(noteTitle).getNoteTitle());
-		Assertions.assertEquals(noteDescription, noteMapper.getNoteByTitle(noteTitle).getNoteDescription());
-		Assertions.assertEquals(1, noteMapper.getNoteByTitle(noteTitle).getUserId());
-	}
-
-	@Test
-	public void createManyNotes() throws InterruptedException {
-		String noteTitle = "New note";
-		String noteDescription = "Description for the note";
-		int numberOfNotesCreated = 5;
-
-		doMockSignUp("NoteTestAccount", "Test", "fakeNotesUser", "123");
-		doLogIn("fakeNotesUser", "123");
-		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
-
-		for (int i = 0; i < numberOfNotesCreated; i++) {
-			noteTitle = noteTitle + String.valueOf(i);
-			noteDescription = noteDescription + String.valueOf(i);
-			notePage.goToNotesTab();
-			notePage.createNewNote(noteTitle, noteDescription);
-			notePage.saveChanges();
-			notePage.goToHomePage();
-			noteTitle = "New note";
-			noteDescription = "Description for the note";
-		}
-
-		Assertions.assertEquals(numberOfNotesCreated, notePage.getNumberOfNotes());
-	}
-
+	
 	@Test
 	public void unauthorizedUserAccess() {
 		driver.get("http://localhost:" + this.port + "/login");
@@ -275,4 +235,78 @@ class CloudStorageApplicationTests {
 		Assertions.assertFalse(driver.getPageSource().contains("home"));
 	}
 
+	@Test
+	public void createNewNote() throws InterruptedException {
+
+		String noteTitle = "New test note";
+		String noteDescription = "Description for the note";
+
+		doMockSignUp(this.firstName, this.lastName, this.user, this.password);
+		doLogIn(this.user, this.password);
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
+		notePage.goToNotesTab();
+		notePage.createNewNote(noteTitle, noteDescription);
+		notePage.saveChanges();
+
+		notePage.goToHomePage();
+		notePage.goToNotesTab();
+
+		Assertions.assertEquals(noteTitle, notePage.getTitle());
+		Assertions.assertEquals(noteDescription, notePage.getDescription());
+		Assertions.assertEquals(1, notePage.getNumberOfNotes());
+
+		// compare with database state
+		Assertions.assertEquals(noteTitle, noteService.getNoteByTitle(noteTitle).getNoteTitle());
+		Assertions.assertEquals(noteDescription, noteService.getNoteByTitle(noteTitle).getNoteDescription());
+	}
+	
+
+	@Test
+	public void testCredentials(EncryptionService encryptionService) throws InterruptedException {
+		String[] urls = {"www.google.de", "www.amazon.de", "www.gmail.com"};
+		String userName = "Krzysztof Pagacz";
+		String password = "superSecretPassword_for_";
+		String newUrl = "branNewUrl.com";
+		
+		
+		doMockSignUp(this.firstName, this.lastName, this.user, this.password);
+		doLogIn(this.user, this.password);
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
+		
+		for (int i=0; i<urls.length; i++) {
+			String url = urls[i];
+			System.out.println(url);
+			String thisPassword = password + url;
+			System.out.println(thisPassword);
+			credentialPage.goToCredentialTab();
+			credentialPage.createNewCredential(url, userName, thisPassword);
+			credentialPage.goToCredentialTab();
+		}
+		
+		Assertions.assertEquals(urls[0], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[1]/th")).getText());
+		Assertions.assertEquals(urls[1], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[2]/th")).getText());
+		Assertions.assertEquals(urls[2], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[3]/th")).getText());
+		
+		Assertions.assertEquals(userName, driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[1]/td[2]")).getText());
+		Assertions.assertEquals(userName, driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[2]/td[2]")).getText());
+		Assertions.assertEquals(userName, driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[3]/td[2]")).getText());
+	
+		Assertions.assertNotEquals(password + urls[0], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[1]/td[3]")).getText());
+		Assertions.assertNotEquals(password + urls[1], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[2]/td[3]")).getText());
+		Assertions.assertNotEquals(password + urls[2], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[3]/td[3]")).getText());
+		
+//		credentialPage.goToCredentialTab();
+		credentialPage.goToEditCredential();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password")));
+//		Assertions.assertEquals(password + urls[0], driver.findElement(By.xpath("//*[@id=\"credential-password\"]")).getText());
+		credentialPage.updateUrlField(newUrl);
+		credentialPage.goToEditCredential();
+		Assertions.assertEquals(newUrl, driver.findElement(By.id("credential-url")).getText());
+		Thread.sleep(5000);
+		
+		
+	}
+	
 }

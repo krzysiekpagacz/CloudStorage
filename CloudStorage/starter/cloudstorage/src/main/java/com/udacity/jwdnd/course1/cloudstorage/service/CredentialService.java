@@ -13,7 +13,7 @@ public class CredentialService {
 	
 	private CredentialMapper credMapper;
 	private EncryptionService encryptionService;
-
+	
 	public CredentialService(CredentialMapper credMapper, EncryptionService encryptionService) {
 		this.credMapper = credMapper;
 		this.encryptionService = encryptionService;
@@ -37,15 +37,19 @@ public class CredentialService {
 		credential.setKey(key);
 		
 		if (option.equals("create")) {
-			entryId = credMapper.createCredential(credential);
+			entryId = this.credMapper.createCredential(credential);
 		} else if (option.equals("update")) {
-			entryId = credMapper.updateCredential(credential);
+			entryId = this.credMapper.updateCredential(credential);
 		}
 		return entryId;
 	}
 
 	public void deleteCredential(Integer credentialId) {
-		credMapper.deleteCredential(credentialId);
+		this.credMapper.deleteCredential(credentialId);
+	}
+	
+	public String getKeyForUrlEntry(String password) {
+		return this.credMapper.getKeyForUrlEntry(password);
 	}
 
 }

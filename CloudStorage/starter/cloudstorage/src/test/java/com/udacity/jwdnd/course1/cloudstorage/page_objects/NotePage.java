@@ -30,7 +30,7 @@ public class NotePage {
 	@FindBy(xpath = "/html/body/div/div[2]/div/div[2]/div[1]/table/tbody/tr/td[2]")
 	private WebElement descriptionField;
 	
-	@FindBy(xpath = "/html/body/div/div/span/a")
+	@FindBy(id = "home-page")
 	private WebElement homePage;
 	
 	@FindBy(xpath = "/html/body/div/div[2]/div/div[2]/div[1]/table/tbody/tr/th")

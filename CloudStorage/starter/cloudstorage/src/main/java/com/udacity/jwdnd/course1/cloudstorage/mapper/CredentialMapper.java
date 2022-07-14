@@ -27,4 +27,7 @@ public interface CredentialMapper {
 	@Delete("DELETE FROM CREDENTIALS WHERE credentialid=#{credentialId}")
 	void deleteCredential(Integer credentialId);
 
+	@Select("SELECT key FROM CREDENTIALS WHERE url=#{url}")
+	String getKeyForUrlEntry(String url);
+
 }
