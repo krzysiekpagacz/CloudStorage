@@ -234,7 +234,7 @@ class CloudStorageApplicationTests {
 	}
 
 	@Test
-	public void createNewNote() throws InterruptedException {
+	public void testNotesHandling() {
 
 		String noteTitle = "New test note";
 		String noteDescription = "Description for the note";
@@ -277,7 +277,7 @@ class CloudStorageApplicationTests {
 	
 
 	@Test
-	public void testCredentials(EncryptionService encryptionService){
+	public void testCredentialsHandling(EncryptionService encryptionService){
 		String[] urls = {"www.google.de", "www.amazon.de", "www.gmail.com"};
 		String userName = "Krzysztof Pagacz";
 		String password = "pass_for_";
@@ -321,7 +321,6 @@ class CloudStorageApplicationTests {
 		Assertions.assertEquals(newUrl, driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[1]/th")).getText());
 		
 		//delete credentials
-		credentialPage.closeCredentialModal();
 		credentialPage.deleteCredential();
 		credentialPage.goToCredentialTab();
 		credentialPage.deleteCredential();
