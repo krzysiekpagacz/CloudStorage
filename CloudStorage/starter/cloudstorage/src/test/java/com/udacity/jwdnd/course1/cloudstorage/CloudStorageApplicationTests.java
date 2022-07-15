@@ -9,21 +9,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.opentest4j.AssertionFailedError;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
 import com.udacity.jwdnd.course1.cloudstorage.page_objects.CredentialPage;
 import com.udacity.jwdnd.course1.cloudstorage.page_objects.NotePage;
 import com.udacity.jwdnd.course1.cloudstorage.params.EncryptionServiceParameter;
-import com.udacity.jwdnd.course1.cloudstorage.service.CredentialService;
 import com.udacity.jwdnd.course1.cloudstorage.service.EncryptionService;
-import com.udacity.jwdnd.course1.cloudstorage.service.NoteService;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
@@ -33,23 +32,15 @@ class CloudStorageApplicationTests {
 
 	@LocalServerPort
 	private int port;
-
-	@Autowired
-	private NoteService noteService;
 	
-	@Autowired
-	CredentialService credentialService;
-
 	private WebDriver driver;
 	private NotePage notePage;
 	private CredentialPage credentialPage;
-	
 	private String firstName = "Krzysztof";
 	private String lastName = "Pagacz";
 	private String user = "test user";
 	private String password = "superSecretPassword_";
 	
-
 	@BeforeAll
 	static void beforeAll() {
 		WebDriverManager.chromedriver().setup();
@@ -147,6 +138,13 @@ class CloudStorageApplicationTests {
 		webDriverWait.until(ExpectedConditions.titleContains("Home"));
 
 	}
+	
+	private void doLogOut() {
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("logout-button")));
+		WebElement logout = driver.findElement(By.id("logout-button"));
+		logout.click();
+	}
 
 	/**
 	 * PLEASE DO NOT DELETE THIS TEST. You may modify this test to work with the
@@ -240,34 +238,50 @@ class CloudStorageApplicationTests {
 
 		String noteTitle = "New test note";
 		String noteDescription = "Description for the note";
+		String newTitle = "2nd note";
+		String newDescription = "Descriptin for 2nd note";
 
 		doMockSignUp(this.firstName, this.lastName, this.user, this.password);
 		doLogIn(this.user, this.password);
 		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
+		
+		//creates a note, and verifies it is displayed.
 		notePage.goToNotesTab();
 		notePage.createNewNote(noteTitle, noteDescription);
 		notePage.saveChanges();
-
 		notePage.goToHomePage();
 		notePage.goToNotesTab();
-
 		Assertions.assertEquals(noteTitle, notePage.getTitle());
 		Assertions.assertEquals(noteDescription, notePage.getDescription());
 		Assertions.assertEquals(1, notePage.getNumberOfNotes());
+		
+		doLogOut();
+		//edits an existing note and verifies that the changes are displayed.
+		doLogIn(this.user, this.password);
+		notePage.goToNotesTab();
+		notePage.editNote(newTitle, newDescription);
+		notePage.goToNotesTab();
+		Assertions.assertEquals(newTitle, driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr/th")).getText());
+		Assertions.assertEquals(newDescription, driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr/td[2]")).getText());
 
-		// compare with database state
-		Assertions.assertEquals(noteTitle, noteService.getNoteByTitle(noteTitle).getNoteTitle());
-		Assertions.assertEquals(noteDescription, noteService.getNoteByTitle(noteTitle).getNoteDescription());
+		//deletes a note and verifies that the note is no longer displayed
+		notePage.deleteNote();
+		notePage.goToNotesTab();
+		
+		Assertions.assertThrows(NoSuchElementException.class, () -> {
+			Assertions.assertEquals(notePage.getTitle(), newTitle);
+			Assertions.assertEquals(notePage.getDescription(), newDescription);
+		});
 	}
 	
 
 	@Test
-	public void testCredentials(EncryptionService encryptionService) throws InterruptedException {
+	public void testCredentials(EncryptionService encryptionService){
 		String[] urls = {"www.google.de", "www.amazon.de", "www.gmail.com"};
 		String userName = "Krzysztof Pagacz";
-		String password = "superSecretPassword_for_";
-		String newUrl = "branNewUrl.com";
+		String password = "pass_for_";
+		String newUrl = "cloudstorage.com";
 		
 		
 		doMockSignUp(this.firstName, this.lastName, this.user, this.password);
@@ -275,11 +289,10 @@ class CloudStorageApplicationTests {
 		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
 		
+		//create credentials
 		for (int i=0; i<urls.length; i++) {
 			String url = urls[i];
-			System.out.println(url);
 			String thisPassword = password + url;
-			System.out.println(thisPassword);
 			credentialPage.goToCredentialTab();
 			credentialPage.createNewCredential(url, userName, thisPassword);
 			credentialPage.goToCredentialTab();
@@ -297,16 +310,31 @@ class CloudStorageApplicationTests {
 		Assertions.assertNotEquals(password + urls[1], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[2]/td[3]")).getText());
 		Assertions.assertNotEquals(password + urls[2], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[3]/td[3]")).getText());
 		
-//		credentialPage.goToCredentialTab();
+		doLogOut();
+		//edit credentials
+		doLogIn(this.user, this.password);
+		credentialPage.goToCredentialTab();
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentials-edit-button")));
 		credentialPage.goToEditCredential();
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password")));
-//		Assertions.assertEquals(password + urls[0], driver.findElement(By.xpath("//*[@id=\"credential-password\"]")).getText());
-		credentialPage.updateUrlField(newUrl);
-		credentialPage.goToEditCredential();
-		Assertions.assertEquals(newUrl, driver.findElement(By.id("credential-url")).getText());
-		Thread.sleep(5000);
+		credentialPage.updateUrlForFirstCredential(newUrl);
+		credentialPage.goToCredentialTab();
+		Assertions.assertEquals(newUrl, driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[1]/th")).getText());
 		
+		//delete credentials
+		credentialPage.closeCredentialModal();
+		credentialPage.deleteCredential();
+		credentialPage.goToCredentialTab();
+		credentialPage.deleteCredential();
+		credentialPage.goToCredentialTab();
+		credentialPage.deleteCredential();
+		credentialPage.goToCredentialTab();
 		
+		Assertions.assertThrows(AssertionFailedError.class, () -> {
+			Assertions.assertEquals(credentialPage.getUrlField(), urls[0]);
+		});
+
 	}
+
+
 	
 }

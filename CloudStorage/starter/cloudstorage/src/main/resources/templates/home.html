@@ -16,7 +16,7 @@
 	<div class="container">
 		<div id="logoutDiv">
 			<form action="#" th:action="@{/logout}" method="POST">
-				<button type="submit" class="btn btn-secondary float-right">Logout</button>
+				<button id="logout-button" type="submit" class="btn btn-secondary float-right">Logout</button>
 			</form>
 		</div>
 		<div id="contentDiv" style="clear: right;">
@@ -93,12 +93,12 @@
 							<tbody th:each="note : ${notes}">
 								<tr>
 									<td>
-										<button type="button" class="btn btn-success"
+										<button id="note-edit-button" type="button" class="btn btn-success"
 											th:onclick="javascript:showNoteModal(
                                                     [[${note.noteId}]],
                                                     [[${note.noteTitle}]],
                                                     [[${note.noteDescription}]])">Edit</button>
-										<a class="btn btn-danger"
+										<a id="note-delete-button" class="btn btn-danger"
 											th:href="@{'/note/' + ${note.noteId} + '/delete'}">Delete</a>
 									</td>
 									<th scope="row" th:text="${note.noteTitle}">Example
@@ -126,7 +126,7 @@
 										th:action="@{/note/create}" method="POST">
 										<input type="hidden" name="noteId" id="note-id">
 										<div class="form-group">
-											<label for="note-title" class="col-form-label">Title</label>
+											<label class="col-form-label">Title</label>
 											<input type="text" field="*{noteTitle}" name="noteTitle"
 												class="form-control" id="note-title" maxlength="20" required>
 										</div>
@@ -175,7 +175,7 @@
 											 [[${credential.url}]],
 											  [[${credential.userName}]],
 											  [[${encryptionService.decryptValue(credential.password, credential.key)}]])">Edit</button>
-										<a class="btn btn-danger" th:href="@{'/credential/' + ${credential.credentialId} + '/delete'}">Delete</a>
+										<a id="credential-delete-button" class="btn btn-danger" th:href="@{'/credential/' + ${credential.credentialId} + '/delete'}">Delete</a>
 									</td>
 									<th th:text="${credential.url}" scope="row">Example
 										CredentialURL</th>
@@ -225,7 +225,7 @@
 									</form>
 								</div>
 								<div class="modal-footer">
-									<button type="button" class="btn btn-secondary"
+									<button id="credential-modal-close-button" type="button" class="btn btn-secondary"
 										data-dismiss="modal">Close</button>
 									<button id="credentials-save-buttoon" type="button" class="btn btn-primary"
 										onclick="$('#credentialSubmit').click();">Save

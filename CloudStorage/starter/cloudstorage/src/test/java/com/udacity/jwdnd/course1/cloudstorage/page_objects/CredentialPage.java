@@ -34,11 +34,41 @@ public class CredentialPage {
 	@FindBy(id = "credentials-edit-button")
 	private WebElement editCredentialButton;
 	
+	@FindBy(id = "credential-delete-button")
+	private WebElement deleteCredentialButton;
+	
+	@FindBy(id = "credential-modal-close-button")
+	private WebElement closeModalCredentialButton;
+	
 	public CredentialPage(WebDriver driver) {
 		PageFactory.initElements(driver, this);
 		this.driver = driver;
 	}
 	
+	public WebElement getUrlField() {
+		return urlField;
+	}
+
+	public void setUrlField(WebElement urlField) {
+		this.urlField = urlField;
+	}
+
+	public WebElement getUserNameField() {
+		return userNameField;
+	}
+
+	public void setUserNameField(WebElement userNameField) {
+		this.userNameField = userNameField;
+	}
+
+	public WebElement getPasswordField() {
+		return passwordField;
+	}
+
+	public void setPasswordField(WebElement passwordField) {
+		this.passwordField = passwordField;
+	}
+
 	public void goToCredentialTab() {
 		this.credentialTab.click();
 	}
@@ -60,12 +90,23 @@ public class CredentialPage {
 		this.editCredentialButton.click();
 	}
 	
-	public void updateUrlField(String newUrl) {
+	public void updateUrlForFirstCredential(String newUrl) {
 		this.urlField.click();
+		this.urlField.clear();
 		this.urlField.sendKeys(newUrl);
 		this.saveButton.click();
-		Assertions.assertTrue(this.driver.getPageSource().contains("Credential has been created!"));
+		Assertions.assertTrue(this.driver.getPageSource().contains("Credential has been updated!"));
 		this.homePage.click();
+	}
+	
+	public void deleteCredential() {
+		this.deleteCredentialButton.click();
+		Assertions.assertTrue(this.driver.getPageSource().contains("Credential has been deleted!"));
+		this.homePage.click();
+	}
+	
+	public void closeCredentialModal() {
+		this.closeModalCredentialButton.click();
 	}
 
 }
