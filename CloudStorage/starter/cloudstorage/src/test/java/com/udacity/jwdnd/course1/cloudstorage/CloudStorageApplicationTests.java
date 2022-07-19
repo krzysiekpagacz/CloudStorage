@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -32,15 +33,17 @@ class CloudStorageApplicationTests {
 
 	@LocalServerPort
 	private int port;
-	
+
 	private WebDriver driver;
+	private WebDriverWait webDriverWait;
+	private JavascriptExecutor jsDriver;
 	private NotePage notePage;
 	private CredentialPage credentialPage;
 	private String firstName = "Krzysztof";
 	private String lastName = "Pagacz";
 	private String user = "test user";
 	private String password = "superSecretPassword_";
-	
+
 	@BeforeAll
 	static void beforeAll() {
 		WebDriverManager.chromedriver().setup();
@@ -49,6 +52,8 @@ class CloudStorageApplicationTests {
 	@BeforeEach
 	public void beforeEach(EncryptionService encryptionService) {
 		this.driver = new ChromeDriver();
+		this.webDriverWait = new WebDriverWait(driver, 2);
+		this.jsDriver = (JavascriptExecutor) this.driver;
 		this.notePage = new NotePage(this.driver);
 		this.credentialPage = new CredentialPage(this.driver);
 	}
@@ -74,7 +79,6 @@ class CloudStorageApplicationTests {
 		// Create a dummy account for logging in later.
 
 		// Visit the sign-up page.
-		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
 		driver.get("http://localhost:" + this.port + "/signup");
 		webDriverWait.until(ExpectedConditions.titleContains("Sign Up"));
 
@@ -119,7 +123,6 @@ class CloudStorageApplicationTests {
 	private void doLogIn(String userName, String password) {
 		// Log in to our dummy account.
 		driver.get("http://localhost:" + this.port + "/login");
-		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
 
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("inputUsername")));
 		WebElement loginUserName = driver.findElement(By.id("inputUsername"));
@@ -138,7 +141,7 @@ class CloudStorageApplicationTests {
 		webDriverWait.until(ExpectedConditions.titleContains("Home"));
 
 	}
-	
+
 	private void doLogOut() {
 		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
 		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("logout-button")));
@@ -203,24 +206,23 @@ class CloudStorageApplicationTests {
 		doLogIn(this.user, this.password);
 
 		// Try to upload an arbitrary large file
-		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
 		String fileName = "upload5m.zip";
 
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("fileUpload")));
+		this.webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("fileUpload")));
 		WebElement fileSelectButton = driver.findElement(By.id("fileUpload"));
 		fileSelectButton.sendKeys(new File(fileName).getAbsolutePath());
 
 		WebElement uploadButton = driver.findElement(By.id("uploadButton"));
 		uploadButton.click();
 		try {
-			webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
+			this.webDriverWait.until(ExpectedConditions.presenceOfElementLocated(By.id("success")));
 		} catch (org.openqa.selenium.TimeoutException e) {
 			System.out.println("Large File upload failed");
 		}
 		Assertions.assertFalse(driver.getPageSource().contains("HTTP Status 403 – Forbidden"));
 
 	}
-	
+
 	@Test
 	public void unauthorizedUserAccess() {
 		driver.get("http://localhost:" + this.port + "/login");
@@ -235,7 +237,6 @@ class CloudStorageApplicationTests {
 
 	@Test
 	public void testNotesHandling() {
-
 		String noteTitle = "New test note";
 		String noteDescription = "Description for the note";
 		String newTitle = "2nd note";
@@ -243,97 +244,101 @@ class CloudStorageApplicationTests {
 
 		doMockSignUp(this.firstName, this.lastName, this.user, this.password);
 		doLogIn(this.user, this.password);
-		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
-		
-		//creates a note, and verifies it is displayed.
-		notePage.goToNotesTab();
-		notePage.createNewNote(noteTitle, noteDescription);
-		notePage.saveChanges();
-		notePage.goToHomePage();
-		notePage.goToNotesTab();
-		Assertions.assertEquals(noteTitle, notePage.getTitle());
-		Assertions.assertEquals(noteDescription, notePage.getDescription());
-		Assertions.assertEquals(1, notePage.getNumberOfNotes());
-		
-		doLogOut();
-		//edits an existing note and verifies that the changes are displayed.
-		doLogIn(this.user, this.password);
-		notePage.goToNotesTab();
-		notePage.editNote(newTitle, newDescription);
-		notePage.goToNotesTab();
-		Assertions.assertEquals(newTitle, driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr/th")).getText());
-		Assertions.assertEquals(newDescription, driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr/td[2]")).getText());
+		this.webDriverWait.until(ExpectedConditions.elementToBeClickable(driver.findElement(By.id("nav-notes-tab"))));
 
-		//deletes a note and verifies that the note is no longer displayed
-		notePage.deleteNote();
+		// creates a note, and verifies it is displayed.
 		notePage.goToNotesTab();
-		
+		notePage.createNewNote(noteTitle, noteDescription, this.jsDriver);
+		notePage.goToNotesTab();
+		Assertions.assertEquals(noteTitle, driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr/th")).getAttribute("innerHTML"));
+		Assertions.assertEquals(noteDescription, driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr[1]/td[2]")).getAttribute("innerHTML"));
+		Assertions.assertEquals(1, notePage.getNumberOfNotes());
+
+		doLogOut();
+		// edits an existing note and verifies that the changes are displayed.
+		doLogIn(this.user, this.password);
+		notePage.goToNotesTab();;
+		notePage.editNote(newTitle, newDescription, this.jsDriver);
+		notePage.goToNotesTab();
+		Assertions.assertEquals(newTitle, driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr/th")).getAttribute("innerHTML"));
+		Assertions.assertEquals(newDescription, driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr[1]/td[2]")).getAttribute("innerHTML"));
+
+		// deletes a note and verifies that the note is no longer displayed
+		notePage.deleteNote(this.jsDriver);
+		notePage.goToNotesTab();
+
 		Assertions.assertThrows(NoSuchElementException.class, () -> {
 			Assertions.assertEquals(notePage.getTitle(), newTitle);
 			Assertions.assertEquals(notePage.getDescription(), newDescription);
 		});
 	}
-	
 
 	@Test
-	public void testCredentialsHandling(EncryptionService encryptionService){
-		String[] urls = {"www.google.de", "www.amazon.de", "www.gmail.com"};
+	public void testCredentialsHandling(EncryptionService encryptionService) {
+		String[] urls = { "www.google.de", "www.amazon.de", "www.gmail.com" };
 		String userName = "Krzysztof Pagacz";
 		String password = "pass_for_";
 		String newUrl = "cloudstorage.com";
-		
-		
+
 		doMockSignUp(this.firstName, this.lastName, this.user, this.password);
 		doLogIn(this.user, this.password);
-		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials-tab")));
-		
-		//create credentials
-		for (int i=0; i<urls.length; i++) {
+		this.webDriverWait
+				.until(ExpectedConditions.elementToBeClickable(driver.findElement(By.id("nav-credentials-tab"))));
+
+		// create credentials
+		for (int i = 0; i < urls.length; i++) {
 			String url = urls[i];
 			String thisPassword = password + url;
 			credentialPage.goToCredentialTab();
-			credentialPage.createNewCredential(url, userName, thisPassword);
+			credentialPage.createNewCredential(url, userName, thisPassword, this.jsDriver);
 			credentialPage.goToCredentialTab();
 		}
-		
-		Assertions.assertEquals(urls[0], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[1]/th")).getText());
-		Assertions.assertEquals(urls[1], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[2]/th")).getText());
-		Assertions.assertEquals(urls[2], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[3]/th")).getText());
-		
-		Assertions.assertEquals(userName, driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[1]/td[2]")).getText());
-		Assertions.assertEquals(userName, driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[2]/td[2]")).getText());
-		Assertions.assertEquals(userName, driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[3]/td[2]")).getText());
-	
-		Assertions.assertNotEquals(password + urls[0], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[1]/td[3]")).getText());
-		Assertions.assertNotEquals(password + urls[1], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[2]/td[3]")).getText());
-		Assertions.assertNotEquals(password + urls[2], driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[3]/td[3]")).getText());
-		
+
+		Assertions.assertEquals(urls[0],
+				driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/th")).getAttribute("innerHTML"));
+		Assertions.assertEquals(urls[1],
+				driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[2]/th")).getAttribute("innerHTML"));
+		Assertions.assertEquals(urls[2],
+				driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[3]/th")).getAttribute("innerHTML"));
+
+		Assertions.assertEquals(userName, driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[1]/td[2]"))
+				.getAttribute("innerHTML"));
+		Assertions.assertEquals(userName, driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[2]/td[2]"))
+				.getAttribute("innerHTML"));
+		Assertions.assertEquals(userName, driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[3]/td[2]"))
+				.getAttribute("innerHTML"));
+
+		Assertions.assertNotEquals(password + urls[0], driver
+				.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[1]/td[3]")).getAttribute("innerHTML"));
+		Assertions.assertNotEquals(password + urls[1], driver
+				.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[2]/td[3]")).getAttribute("innerHTML"));
+		Assertions.assertNotEquals(password + urls[2], driver
+				.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[3]/td[3]")).getAttribute("innerHTML"));
+
 		doLogOut();
-		//edit credentials
+
+		// edit credentials
 		doLogIn(this.user, this.password);
 		credentialPage.goToCredentialTab();
-		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentials-edit-button")));
+		webDriverWait.until(ExpectedConditions.elementToBeClickable(By.id("credentials-edit-button")));
 		credentialPage.goToEditCredential();
-		credentialPage.updateUrlForFirstCredential(newUrl);
+		credentialPage.updateUrlForFirstCredential(newUrl, this.jsDriver);
 		credentialPage.goToCredentialTab();
-		Assertions.assertEquals(newUrl, driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[1]/th")).getText());
-		
-		//delete credentials
-		credentialPage.deleteCredential();
+		Assertions.assertEquals(newUrl,
+				driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr[1]/th")).getAttribute("innerHTML"));
+
+		// delete credentials
+		credentialPage.deleteCredential(this.jsDriver);
 		credentialPage.goToCredentialTab();
-		credentialPage.deleteCredential();
+		credentialPage.deleteCredential(this.jsDriver);
 		credentialPage.goToCredentialTab();
-		credentialPage.deleteCredential();
+		credentialPage.deleteCredential(this.jsDriver);
 		credentialPage.goToCredentialTab();
-		
+
 		Assertions.assertThrows(AssertionFailedError.class, () -> {
 			Assertions.assertEquals(credentialPage.getUrlField(), urls[0]);
 		});
 
 	}
 
-
-	
 }

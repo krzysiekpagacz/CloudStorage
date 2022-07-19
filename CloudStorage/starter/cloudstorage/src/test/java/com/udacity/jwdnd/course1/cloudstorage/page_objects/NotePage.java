@@ -3,10 +3,14 @@ package com.udacity.jwdnd.course1.cloudstorage.page_objects;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class NotePage {
 	
@@ -54,16 +58,15 @@ public class NotePage {
 		this.notesTab.click();
 	}
 	
-	public void createNewNote(String title, String description) {
-		this.newNoteButton.click();
-		this.noteTitleField.click();
-		this.noteTitleField.sendKeys(title);
-		this.noteDescriptionField.click();
-		this.noteDescriptionField.sendKeys(description);
-	}
-	
-	public void saveChanges() {
-		this.saveButton.click();
+	public void createNewNote(String title, String description, JavascriptExecutor jsDriver) {
+		jsDriver.executeScript("arguments[0].click();", this.newNoteButton);
+		jsDriver.executeScript("arguments[0].click();", this.noteTitleField);
+		jsDriver.executeScript("arguments[0].value='" + title +"';", this.noteTitleField);
+		jsDriver.executeScript("arguments[0].click();", this.noteDescriptionField);
+		jsDriver.executeScript("arguments[0].value='" + description +"';", this.noteDescriptionField);
+		jsDriver.executeScript("arguments[0].click();", this.saveButton);
+		Assertions.assertTrue(this.driver.getPageSource().contains("Note has been created!"));
+		jsDriver.executeScript("arguments[0].click();", this.homePage);
 	}
 	
 	public int getNumberOfNotes() {
@@ -82,20 +85,22 @@ public class NotePage {
 		this.homePage.click();
 	}
 	
-	public void editNote(String newTitle, String newDescription) {
-		this.noteEditButton.click();
-		this.noteTitleField.clear();
-		this.noteTitleField.sendKeys(newTitle);
-		this.noteDescriptionField.clear();
-		this.noteDescriptionField.sendKeys(newDescription);
-		this.saveButton.click();
+	public void editNote(String newTitle, String newDescription, JavascriptExecutor jsDriver) {
+		jsDriver.executeScript("arguments[0].click();", this.noteEditButton);
+		jsDriver.executeScript("arguments[0].click();", this.noteTitleField);
+		jsDriver.executeScript("arguments[0].value='';", this.noteTitleField);
+		jsDriver.executeScript("arguments[0].value='" + newTitle +"';", this.noteTitleField);
+		jsDriver.executeScript("arguments[0].click();", this.noteDescriptionField);
+		jsDriver.executeScript("arguments[0].value='';", this.noteDescriptionField);
+		jsDriver.executeScript("arguments[0].value='" + newDescription +"';", this.noteDescriptionField);
+		jsDriver.executeScript("arguments[0].click();", this.saveButton);
 		Assertions.assertTrue(this.driver.getPageSource().contains("Note has been updated!"));
-		this.homePage.click();
+		jsDriver.executeScript("arguments[0].click();", this.homePage);
 	}
 	
-	public void deleteNote() {
-		this.noteDeleteButton.click();
+	public void deleteNote(JavascriptExecutor jsDriver) {
+		jsDriver.executeScript("arguments[0].click();", this.noteDeleteButton);
 		Assertions.assertTrue(this.driver.getPageSource().contains("Note has been deleted!"));
-		this.homePage.click();
+		jsDriver.executeScript("arguments[0].click();", this.homePage);
 	}
 }

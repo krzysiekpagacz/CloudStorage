@@ -1,6 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage.page_objects;
 
 import org.junit.jupiter.api.Assertions;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -73,36 +74,36 @@ public class CredentialPage {
 		this.credentialTab.click();
 	}
 	
-	public void createNewCredential(String url, String userName, String password) {
-		this.newCredentialButton.click();
-		this.urlField.click();
-		this.urlField.sendKeys(url);
-		this.userNameField.click();
-		this.userNameField.sendKeys(userName);
-		this.passwordField.click();
-		this.passwordField.sendKeys(password);
-		this.saveButton.click();
+	public void createNewCredential(String url, String userName, String password, JavascriptExecutor jsDriver) {
+		jsDriver.executeScript("arguments[0].click();", this.newCredentialButton);
+		jsDriver.executeScript("arguments[0].click();", this.urlField);
+		jsDriver.executeScript("arguments[0].value='" + url + "';", this.urlField);
+		jsDriver.executeScript("arguments[0].click();", this.userNameField);
+		jsDriver.executeScript("arguments[0].value='" + userName + "';", this.userNameField);
+		jsDriver.executeScript("arguments[0].click();", this.passwordField);
+		jsDriver.executeScript("arguments[0].value='" + password + "';", this.passwordField);
+		jsDriver.executeScript("arguments[0].click();", this.saveButton);
 		Assertions.assertTrue(this.driver.getPageSource().contains("Credential has been created!"));
-		this.homePage.click();
+		jsDriver.executeScript("arguments[0].click();", this.homePage);
 	}
 	
 	public void goToEditCredential() {
 		this.editCredentialButton.click();
 	}
 	
-	public void updateUrlForFirstCredential(String newUrl) {
-		this.urlField.click();
-		this.urlField.clear();
-		this.urlField.sendKeys(newUrl);
-		this.saveButton.click();
+	public void updateUrlForFirstCredential(String newUrl, JavascriptExecutor jsDriver) {
+		jsDriver.executeScript("arguments[0].click();", this.urlField);
+		jsDriver.executeScript("arguments[0].value='';", this.urlField);
+		jsDriver.executeScript("arguments[0].value='" + newUrl + "';", this.urlField);
+		jsDriver.executeScript("arguments[0].click();", this.saveButton);
 		Assertions.assertTrue(this.driver.getPageSource().contains("Credential has been updated!"));
-		this.homePage.click();
+		jsDriver.executeScript("arguments[0].click();", this.homePage);
 	}
 	
-	public void deleteCredential() {
-		this.deleteCredentialButton.click();
+	public void deleteCredential(JavascriptExecutor jsDriver) {
+		jsDriver.executeScript("arguments[0].click();", this.deleteCredentialButton);
 		Assertions.assertTrue(this.driver.getPageSource().contains("Credential has been deleted!"));
-		this.homePage.click();
+		jsDriver.executeScript("arguments[0].click();", this.homePage);
 	}
 	
 	public void closeCredentialModal() {
